@@ -290,6 +290,29 @@ section {
   gap: 8px;
 }
 
+.language-field {
+  display: grid;
+  gap: 5px;
+}
+
+.language-field span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.language-field select {
+  width: 100%;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  padding: 9px 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+}
+
 .upgrade-shop button,
 .class-select button,
 .shop-panel button,

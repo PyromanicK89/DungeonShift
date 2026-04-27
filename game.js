@@ -37,6 +37,7 @@ const els = {
   shopPanel: document.querySelector("#shopPanel"),
   inventoryPanel: document.querySelector("#inventoryPanel"),
   classSelect: document.querySelector("#classSelect"),
+  languageSelect: document.querySelector("#languageSelect"),
   mightCost: document.querySelector("#mightCost"),
   vigorCost: document.querySelector("#vigorCost"),
   swiftCost: document.querySelector("#swiftCost"),
@@ -197,6 +198,131 @@ const sprites = {
   ],
 };
 
+const i18n = {
+  nl: {
+    startRun: "Start Run",
+    resetProgress: "Reset Progressie",
+    language: "Taal",
+    chooseHero: "Kies je held",
+    dailyCurse: "Dagelijkse vloek",
+    permanentUpgrades: "Permanente upgrades",
+    controls: "Besturing",
+    controlsText: "Tijdens een run: WASD bewegen, muis richten, linkermuisknop basisaanval, Q/E/R abilities, spatie dash. Items draag je vooraf in het character menu.",
+    metaProgress: "Meta progressie",
+    characterMenu: "Character menu",
+    lastLoot: "Laatste loot",
+    leaderboardName: "Naam voor leaderboard",
+    namePlaceholder: "Vul je naam in",
+    hero: "Held",
+    lastRunLoot: "Laatste run loot",
+    viewMap: "Bekijk Map",
+    chooseUpgrade: "Kies een run-upgrade",
+    backToCamp: "Naar kamp",
+    running: "Run bezig",
+    newRun: "Nieuwe Run",
+    readyTitle: "Ready",
+    readyText: "Kies je held en start een run",
+    centerReady: "Kies je held en start de run",
+    huntTitle: "Hunt",
+    huntText: kills => `${kills} kills tot de boss verschijnt`,
+    bossTitle: "Boss",
+    bossText: "Versla The Hollow Alpha",
+    escapeTitle: "Escape",
+    escapeText: "Overleef tot de timer eindigt",
+    shardsAvailable: (shards, best) => `${shards} shards beschikbaar | beste run ${best} kills`,
+    metaStats: (shards, total, best) => `${shards} shards beschikbaar | ${total} totaal | beste run ${best} kills`,
+    noLootLog: "Nog geen bijzondere vondsten.",
+    noLastLoot: "Nog geen loot",
+    noLastLootHint: "Start een run en open chests.",
+    foundLastRun: "Gevonden in je laatste run",
+    noRuns: "Nog geen runs",
+    bonusDamage: "bonus damage",
+    bonusHp: "bonus HP",
+    speed: "speed",
+    skillPower: "skill power",
+    emptySlot: slot => `${slot.toUpperCase()}: leeg`,
+    noEquippedItem: "Geen item uitgerust",
+    noItems: "Geen items",
+    noItemsHint: "Open chests of versla elites voor loot.",
+    equip: "Draag",
+    salvage: "Sloop",
+    equipTitle: "Draag item",
+    salvageTitle: "Sloop item voor shards",
+    level: "Level",
+    kills: "kills",
+    completed: "klaar",
+    questComplete: reward => `Quest voltooid: +${reward}`,
+    summaryKills: "kills",
+    summaryShards: "shards",
+    summaryLevel: "level",
+    runComplete: "Run voltooid",
+  },
+  en: {
+    startRun: "Start Run",
+    resetProgress: "Reset Progress",
+    language: "Language",
+    chooseHero: "Choose your hero",
+    dailyCurse: "Daily curse",
+    permanentUpgrades: "Permanent upgrades",
+    controls: "Controls",
+    controlsText: "During a run: WASD to move, aim with the mouse, left mouse for basic attack, Q/E/R abilities, space to dash. Equip items before starting in the character menu.",
+    metaProgress: "Meta progression",
+    characterMenu: "Character menu",
+    lastLoot: "Latest loot",
+    leaderboardName: "Leaderboard name",
+    namePlaceholder: "Enter your name",
+    hero: "Hero",
+    lastRunLoot: "Last run loot",
+    viewMap: "View Map",
+    chooseUpgrade: "Choose a run upgrade",
+    backToCamp: "Back to camp",
+    running: "Run active",
+    newRun: "New Run",
+    readyTitle: "Ready",
+    readyText: "Choose your hero and start a run",
+    centerReady: "Choose your hero and start the run",
+    huntTitle: "Hunt",
+    huntText: kills => `${kills} kills until the boss appears`,
+    bossTitle: "Boss",
+    bossText: "Defeat The Hollow Alpha",
+    escapeTitle: "Escape",
+    escapeText: "Survive until the timer ends",
+    shardsAvailable: (shards, best) => `${shards} shards available | best run ${best} kills`,
+    metaStats: (shards, total, best) => `${shards} shards available | ${total} total | best run ${best} kills`,
+    noLootLog: "No rare finds yet.",
+    noLastLoot: "No loot yet",
+    noLastLootHint: "Start a run and open chests.",
+    foundLastRun: "Found in your last run",
+    noRuns: "No runs yet",
+    bonusDamage: "bonus damage",
+    bonusHp: "bonus HP",
+    speed: "speed",
+    skillPower: "skill power",
+    emptySlot: slot => `${slot.toUpperCase()}: empty`,
+    noEquippedItem: "No item equipped",
+    noItems: "No items",
+    noItemsHint: "Open chests or defeat elites for loot.",
+    equip: "Equip",
+    salvage: "Salvage",
+    equipTitle: "Equip item",
+    salvageTitle: "Salvage item for shards",
+    level: "Level",
+    kills: "kills",
+    completed: "done",
+    questComplete: reward => `Quest complete: +${reward}`,
+    summaryKills: "kills",
+    summaryShards: "shards",
+    summaryLevel: "level",
+    runComplete: "Run complete",
+  },
+};
+
+function t(key, ...args) {
+  const lang = i18n[save?.language] ? save.language : "nl";
+  const value = i18n[lang][key] ?? i18n.nl[key] ?? key;
+  return typeof value === "function" ? value(...args) : value;
+}
+
 const abilityIcons = {
   attack: {
     knight: "assets/skills/knight/sword_slash.png",
@@ -345,6 +471,7 @@ const lootTable = [
 ];
 
 let save = loadSave();
+save.inventory = compactInventory(save.inventory);
 let state = freshState();
 let pausedForChoice = false;
 let lastTime = performance.now();
@@ -358,6 +485,7 @@ function loadSave() {
     swift: 0,
     bestKills: 0,
     selectedClass: "knight",
+    language: "nl",
     playerName: "",
     loot: [],
     lastRunLoot: [],
@@ -408,8 +536,28 @@ function collectSpritePaths(value) {
 }
 
 function persist() {
+  save.inventory = compactInventory(save.inventory);
   localStorage.setItem(storeKey, JSON.stringify(save));
   renderMeta();
+}
+
+function compactInventory(items) {
+  const byId = new Map();
+  for (const item of items || []) {
+    if (item?.id && !byId.has(item.id)) byId.set(item.id, item);
+  }
+  const equippedIds = new Set(Object.values(save.equipped || {}).filter(Boolean));
+  const equipped = [];
+  const others = [];
+  for (const item of byId.values()) {
+    if (equippedIds.has(item.id)) equipped.push(item);
+    else others.push(item);
+  }
+  return [...equipped, ...others].slice(0, Math.max(24, equipped.length));
+}
+
+function addInventoryItem(item) {
+  save.inventory = compactInventory([item, ...(save.inventory || [])]);
 }
 
 function todayKey() {
@@ -646,7 +794,7 @@ function startRun() {
   state.running = true;
   els.campScreen.classList.add("hidden");
   els.runSummary.classList.add("hidden");
-  els.startBtn.textContent = "Run bezig";
+  els.startBtn.textContent = t("running");
   els.startBtn.disabled = true;
   renderClasses();
 }
@@ -664,7 +812,7 @@ function endRun(message) {
   recordLeaderboard(message);
   persist();
   addFloater(state.player.x, state.player.y - 60, `${message} +${state.shards} shards`, "#f5c15f", 2.6);
-  els.startBtn.textContent = "Nieuwe Run";
+  els.startBtn.textContent = t("newRun");
   els.startBtn.disabled = false;
   renderClasses();
   showRunSummary(message);
@@ -674,9 +822,10 @@ function showRunSummary(message) {
   els.summaryTitle.textContent = message;
   els.summaryStats.innerHTML = `
     <div><strong>${state.kills}</strong><span>kills</span></div>
-    <div><strong>${state.shards}</strong><span>shards</span></div>
-    <div><strong>${state.level}</strong><span>level</span></div>
+    <div><strong>${state.shards}</strong><span>${t("summaryShards")}</span></div>
+    <div><strong>${state.level}</strong><span>${t("summaryLevel")}</span></div>
   `;
+  els.summaryStats.querySelector("span").textContent = t("summaryKills");
   if (state.lootFound.length) {
     els.summaryStats.innerHTML += `<div style="grid-column:1/-1"><strong>${state.lootFound.length}</strong><span>${state.lootFound.slice(0, 3).join(" | ")}</span></div>`;
   }
@@ -1228,8 +1377,7 @@ function collectPickups(dt) {
       if (item.type === "shard") state.shards += item.value;
       if (item.type === "xp") gainXp(item.value);
       if (item.type === "loot") {
-        save.inventory.unshift(item.value);
-        save.inventory = save.inventory.slice(0, 24);
+        addInventoryItem(item.value);
         state.lootFound.unshift(`${item.value.rarity}: ${item.value.name}`);
         persist();
         addFloater(p.x, p.y - 28, item.value.name, item.value.color, 1.4);
@@ -1263,7 +1411,7 @@ function checkDailyQuests(forceRender) {
     if (!save.daily.completed.includes(quest.id) && quest.progress() >= quest.goal) {
       save.daily.completed.push(quest.id);
       state.shards += quest.reward;
-      addFloater(state.player.x, state.player.y - 54 - save.daily.completed.length * 18, `Quest voltooid: +${quest.reward}`, "#f5c15f", 1.8);
+      addFloater(state.player.x, state.player.y - 54 - save.daily.completed.length * 18, t("questComplete", quest.reward), "#f5c15f", 1.8);
       changed = true;
     }
   }
@@ -1306,7 +1454,7 @@ function draw() {
   for (const floater of state.floaters) drawFloater(floater);
   ctx.restore();
   drawScreenVignette();
-  if (!state.running && !state.ended) drawCenterText("Kies je held en start de run");
+  if (!state.running && !state.ended) drawCenterText(t("centerReady"));
   renderHud();
   renderMinimap();
 }
@@ -1835,33 +1983,33 @@ function renderHud() {
   const p = state.player;
   els.hpText.textContent = `HP ${Math.ceil(Math.max(0, p.hp))}/${p.maxHp}`;
   els.hpBar.style.width = `${clamp((p.hp / p.maxHp) * 100, 0, 100)}%`;
-  els.xpText.textContent = `Level ${state.level}`;
+  els.xpText.textContent = `${t("level")} ${state.level}`;
   els.xpBar.style.width = `${clamp((state.xp / state.xpNeed) * 100, 0, 100)}%`;
   els.timer.textContent = formatTime(state.timeLeft);
   els.coins.textContent = `${state.shards} shards`;
-  els.kills.textContent = `${state.kills} kills`;
+  els.kills.textContent = `${state.kills} ${t("kills")}`;
   renderAbilityBar();
   renderObjective();
 }
 
 function renderObjective() {
   if (!state.running) {
-    els.objectiveTitle.textContent = "Ready";
-    els.objectiveText.textContent = "Kies je held en start een run";
+    els.objectiveTitle.textContent = t("readyTitle");
+    els.objectiveText.textContent = t("readyText");
     return;
   }
   if (!state.bossSpawned) {
-    els.objectiveTitle.textContent = "Hunt";
-    els.objectiveText.textContent = `${Math.max(0, 45 - state.kills)} kills tot de boss verschijnt`;
+    els.objectiveTitle.textContent = t("huntTitle");
+    els.objectiveText.textContent = t("huntText", Math.max(0, 45 - state.kills));
     return;
   }
   if (!state.bossDefeated) {
-    els.objectiveTitle.textContent = "Boss";
-    els.objectiveText.textContent = "Versla The Hollow Alpha";
+    els.objectiveTitle.textContent = t("bossTitle");
+    els.objectiveText.textContent = t("bossText");
     return;
   }
-  els.objectiveTitle.textContent = "Escape";
-  els.objectiveText.textContent = "Overleef tot de timer eindigt";
+  els.objectiveTitle.textContent = t("escapeTitle");
+  els.objectiveText.textContent = t("escapeText");
 }
 
 function renderMinimap() {
@@ -1925,14 +2073,31 @@ function renderAbilityBar() {
   }
 }
 
+function applyLanguage() {
+  if (els.languageSelect && els.languageSelect.value !== save.language) {
+    els.languageSelect.value = save.language;
+  }
+  document.documentElement.lang = save.language === "en" ? "en" : "nl";
+  document.querySelectorAll("[data-i18n]").forEach(node => {
+    node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(node => {
+    node.placeholder = t(node.dataset.i18nPlaceholder);
+  });
+  if (!state.running) {
+    els.startBtn.textContent = state.ended ? t("newRun") : t("startRun");
+  }
+}
+
 function renderMeta() {
   normalizeDaily();
+  applyLanguage();
   els.dailyMod.textContent = `${todayMod().name}: ${todayMod().text}`;
-  els.metaStats.textContent = `${save.shards} shards beschikbaar | ${save.totalShards} totaal | beste run ${save.bestKills} kills`;
+  els.metaStats.textContent = t("metaStats", save.shards, save.totalShards, save.bestKills);
   els.mightCost.textContent = cost("might");
   els.vigorCost.textContent = cost("vigor");
   els.swiftCost.textContent = cost("swift");
-  els.lootLog.textContent = save.loot?.length ? save.loot.slice(0, 4).join(" | ") : "Nog geen bijzondere vondsten.";
+  els.lootLog.textContent = save.loot?.length ? save.loot.slice(0, 4).join(" | ") : t("noLootLog");
   renderQuests();
   renderCharacter();
   renderInventory();
@@ -1941,7 +2106,7 @@ function renderMeta() {
 }
 
 function renderCamp() {
-  els.campSubtitle.textContent = `${save.shards} shards beschikbaar | beste run ${save.bestKills} kills`;
+  els.campSubtitle.textContent = t("shardsAvailable", save.shards, save.bestKills);
   if (document.activeElement !== els.playerNameInput) {
     els.playerNameInput.value = save.playerName || "";
   }
@@ -1956,14 +2121,14 @@ function renderLastRunLoot() {
   if (!names.length) {
     const empty = document.createElement("div");
     empty.className = "equipment-slot";
-    empty.innerHTML = "<span class=\"item-icon\">?</span><span>Nog geen loot</span><small>Start een run en open chests.</small>";
+    empty.innerHTML = `<span class="item-icon">?</span><span>${t("noLastLoot")}</span><small>${t("noLastLootHint")}</small>`;
     els.campLootPanel.appendChild(empty);
     return;
   }
   for (const name of names.slice(0, 6)) {
     const div = document.createElement("div");
     div.className = "equipment-slot";
-    div.innerHTML = `<span class="item-icon">L</span><span>${name}</span><small>Gevonden in je laatste run</small>`;
+    div.innerHTML = `<span class="item-icon">L</span><span>${name}</span><small>${t("foundLastRun")}</small>`;
     els.campLootPanel.appendChild(div);
   }
 }
@@ -1972,13 +2137,13 @@ function renderLeaderboard() {
   els.leaderboardPanel.innerHTML = "";
   const rows = save.leaderboard || [];
   if (!rows.length) {
-    els.leaderboardPanel.innerHTML = "<div class=\"leaderboard-row\"><strong>-</strong><span>Nog geen runs</span><small>0</small></div>";
+    els.leaderboardPanel.innerHTML = `<div class="leaderboard-row"><strong>-</strong><span>${t("noRuns")}</span><small>0</small></div>`;
     return;
   }
   rows.slice(0, 8).forEach((row, index) => {
     const div = document.createElement("div");
     div.className = "leaderboard-row";
-    div.innerHTML = `<strong>${index + 1}</strong><span>${row.playerName || row.player_name || "Anonymous"} | ${row.className} | ${row.kills} kills | Lv ${row.level}${row.boss ? " | Boss" : ""}</span><small>${row.score}</small>`;
+    div.innerHTML = `<strong>${index + 1}</strong><span>${row.playerName || row.player_name || "Anonymous"} | ${row.className} | ${row.kills} ${t("kills")} | Lv ${row.level}${row.boss ? " | Boss" : ""}</span><small>${row.score}</small>`;
     els.leaderboardPanel.appendChild(div);
   });
 }
@@ -1993,10 +2158,10 @@ function renderCharacterInto(target) {
   target.innerHTML = `
     <div class="character-card">
       <div class="stat-grid">
-        <div class="stat-pill"><strong>${gear.damage}</strong><small>bonus damage</small></div>
-        <div class="stat-pill"><strong>${gear.maxHp}</strong><small>bonus HP</small></div>
-        <div class="stat-pill"><strong>${Math.round(gear.speed * 100)}%</strong><small>speed</small></div>
-        <div class="stat-pill"><strong>${Math.round(gear.skillPower * 100)}%</strong><small>skill power</small></div>
+        <div class="stat-pill"><strong>${gear.damage}</strong><small>${t("bonusDamage")}</small></div>
+        <div class="stat-pill"><strong>${gear.maxHp}</strong><small>${t("bonusHp")}</small></div>
+        <div class="stat-pill"><strong>${Math.round(gear.speed * 100)}%</strong><small>${t("speed")}</small></div>
+        <div class="stat-pill"><strong>${Math.round(gear.skillPower * 100)}%</strong><small>${t("skillPower")}</small></div>
       </div>
     </div>
   `;
@@ -2006,7 +2171,7 @@ function renderCharacterInto(target) {
     div.className = "equipment-slot";
     div.innerHTML = item
       ? `<span class="item-icon" style="color:${item.color}">${slotIcon(item.slot)}</span><span>${slot.toUpperCase()}: ${item.name}</span><small style="color:${item.color}">${itemStatText(item)}</small>${itemTooltip(item)}`
-      : `<span class="item-icon">${slotIcon(slot)}</span><span>${slot.toUpperCase()}: leeg</span><small>Geen item uitgerust</small>`;
+      : `<span class="item-icon">${slotIcon(slot)}</span><span>${t("emptySlot", slot)}</span><small>${t("noEquippedItem")}</small>`;
     target.appendChild(div);
   }
 }
@@ -2017,7 +2182,7 @@ function renderInventory() {
   if (!items.length) {
     const empty = document.createElement("div");
     empty.className = "equipment-slot";
-    empty.innerHTML = "<span>Geen items</span><small>Open chests of versla elites voor loot.</small>";
+    empty.innerHTML = `<span>${t("noItems")}</span><small>${t("noItemsHint")}</small>`;
     els.inventoryPanel.appendChild(empty);
     return;
   }
@@ -2031,8 +2196,8 @@ function renderInventory() {
       <span>${equipped ? "E " : ""}${item.name}</span>
       <small style="color:${item.color}">${item.slot} | ${itemStatText(item)}</small>
       <div class="item-actions">
-        <button data-equip="${item.id}" title="Draag item">Draag</button>
-        <button data-salvage="${item.id}" title="Sloop item voor shards">Sloop</button>
+        <button data-equip="${item.id}" title="${t("equipTitle")}">${t("equip")}</button>
+        <button data-salvage="${item.id}" title="${t("salvageTitle")}">${t("salvage")}</button>
       </div>
       ${itemTooltip(item)}
     `;
@@ -2071,8 +2236,7 @@ function buyShopItem(kind) {
   if (!offer || save.shards < offer.cost) return;
   save.shards -= offer.cost;
   const item = createLootItem(offer.guarantee);
-  save.inventory.unshift(item);
-  save.inventory = save.inventory.slice(0, 24);
+  addInventoryItem(item);
   save.loot = [`shop: ${item.name}`, ...(save.loot || [])].slice(0, 8);
   persist();
   state = freshState();
@@ -2108,7 +2272,7 @@ function renderQuests() {
     const progress = clamp(quest.progress(), 0, quest.goal);
     const item = document.createElement("div");
     item.className = "quest";
-    item.innerHTML = `<strong>${quest.title}</strong><em>${done ? "klaar" : `+${quest.reward}`}</em><small>${progress}/${quest.goal} ${quest.label}</small>`;
+    item.innerHTML = `<strong>${quest.title}</strong><em>${done ? t("completed") : `+${quest.reward}`}</em><small>${progress}/${quest.goal} ${quest.label}</small>`;
     els.dailyQuests.appendChild(item);
   }
 }
@@ -2234,13 +2398,19 @@ els.playerNameInput.addEventListener("input", () => {
   save.playerName = cleanPlayerName(els.playerNameInput.value);
   localStorage.setItem(storeKey, JSON.stringify(save));
 });
+els.languageSelect.addEventListener("change", () => {
+  save.language = els.languageSelect.value === "en" ? "en" : "nl";
+  persist();
+});
 els.resetBtn.addEventListener("click", () => {
+  const language = save.language;
   localStorage.removeItem(storeKey);
   save = loadSave();
+  save.language = language;
   state = freshState();
   persist();
   renderClasses();
-  els.startBtn.textContent = "Start Run";
+  els.startBtn.textContent = t("startRun");
   els.startBtn.disabled = false;
 });
 

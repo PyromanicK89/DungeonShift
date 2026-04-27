@@ -40,17 +40,24 @@
         </header>
 
         <div class="controls">
-          <button id="startBtn">Start Run</button>
-          <button id="resetBtn" class="secondary">Reset Progressie</button>
+          <button id="startBtn" data-i18n="startRun">Start Run</button>
+          <button id="resetBtn" class="secondary" data-i18n="resetProgress">Reset Progressie</button>
+          <label class="language-field">
+            <span data-i18n="language">Taal</span>
+            <select id="languageSelect">
+              <option value="nl">Nederlands</option>
+              <option value="en">English</option>
+            </select>
+          </label>
         </div>
 
         <section>
-          <h2>Kies je held</h2>
+          <h2 data-i18n="chooseHero">Kies je held</h2>
           <div id="classSelect" class="class-select"></div>
         </section>
 
         <section>
-          <h2>Dagelijkse vloek</h2>
+          <h2 data-i18n="dailyCurse">Dagelijkse vloek</h2>
           <p id="dailyMod">Laden...</p>
         </section>
 
@@ -60,7 +67,7 @@
         </section>
 
         <section>
-          <h2>Permanente upgrades</h2>
+          <h2 data-i18n="permanentUpgrades">Permanente upgrades</h2>
           <div class="upgrade-shop">
             <button data-upgrade="might">
               <span>Might</span>
@@ -78,17 +85,17 @@
         </section>
 
         <section class="run-notes">
-          <h2>Besturing</h2>
-          <p>Tijdens een run: WASD bewegen, muis richten, linkermuisknop basisaanval, Q/E/R abilities, spatie dash. Items draag je vooraf in het character menu.</p>
+          <h2 data-i18n="controls">Besturing</h2>
+          <p data-i18n="controlsText">Tijdens een run: WASD bewegen, muis richten, linkermuisknop basisaanval, Q/E/R abilities, spatie dash. Items draag je vooraf in het character menu.</p>
         </section>
 
         <section>
-          <h2>Meta progressie</h2>
+          <h2 data-i18n="metaProgress">Meta progressie</h2>
           <p id="metaStats">0 totale shards</p>
         </section>
 
         <section>
-          <h2>Character menu</h2>
+          <h2 data-i18n="characterMenu">Character menu</h2>
           <div id="characterPanel" class="character-panel"></div>
         </section>
 
@@ -116,7 +123,7 @@
         </section>
 
         <section>
-          <h2>Laatste loot</h2>
+          <h2 data-i18n="lastLoot">Laatste loot</h2>
           <p id="lootLog">Nog geen bijzondere vondsten.</p>
         </section>
       </aside>
@@ -130,12 +137,12 @@
           <span id="campSubtitle">Bereid je run voor</span>
         </div>
         <label class="player-name-field">
-          <span>Naam voor leaderboard</span>
-          <input id="playerNameInput" maxlength="18" placeholder="Vul je naam in">
+          <span data-i18n="leaderboardName">Naam voor leaderboard</span>
+          <input id="playerNameInput" maxlength="18" placeholder="Vul je naam in" data-i18n-placeholder="namePlaceholder">
         </label>
         <div class="camp-grid">
           <section>
-            <h2>Held</h2>
+            <h2 data-i18n="hero">Held</h2>
             <div id="campClassSelect" class="class-select"></div>
           </section>
           <section>
@@ -143,7 +150,7 @@
             <div id="campCharacterPanel" class="character-panel"></div>
           </section>
           <section>
-            <h2>Laatste run loot</h2>
+            <h2 data-i18n="lastRunLoot">Laatste run loot</h2>
             <div id="campLootPanel" class="inventory-panel"></div>
           </section>
           <section>
@@ -152,15 +159,15 @@
           </section>
         </div>
         <div class="camp-actions">
-          <button id="campStartBtn">Start Run</button>
-          <button id="campCloseBtn" class="secondary">Bekijk Map</button>
+          <button id="campStartBtn" data-i18n="startRun">Start Run</button>
+          <button id="campCloseBtn" class="secondary" data-i18n="viewMap">Bekijk Map</button>
         </div>
       </div>
     </div>
 
     <div id="choiceModal" class="modal hidden">
       <div class="modal-card">
-        <h2>Kies een run-upgrade</h2>
+        <h2 data-i18n="chooseUpgrade">Kies een run-upgrade</h2>
         <div id="choices" class="choices"></div>
       </div>
     </div>
@@ -169,7 +176,7 @@
       <div class="modal-card summary-card">
         <h2 id="summaryTitle">Run voltooid</h2>
         <div id="summaryStats" class="summary-stats"></div>
-        <button id="summaryClose">Naar kamp</button>
+        <button id="summaryClose" data-i18n="backToCamp">Naar kamp</button>
       </div>
     </div>
 
