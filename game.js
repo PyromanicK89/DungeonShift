@@ -54,7 +54,7 @@ const els = {
 
 const storeKey = "dungeon-shift-save-v2";
 const keys = new Set();
-const worldSize = { w: 2400, h: 1700 };
+const worldSize = { w: 3100, h: 2200 };
 const mouse = { screenX: canvas.width / 2, screenY: canvas.height / 2, x: canvas.width / 2, y: canvas.height / 2, down: false };
 
 const sprites = {
@@ -116,6 +116,28 @@ const sprites = {
     hellhound: [
       "assets/sprites/monsters/hellhound_0.png",
       "assets/sprites/monsters/hellhound_1.png",
+    ],
+    floatingEye: [
+      "assets/sprites/monsters/floating_eye_0.png",
+      "assets/sprites/monsters/floating_eye_1.png",
+      "assets/sprites/monsters/floating_eye_2.png",
+    ],
+    bat: [
+      "assets/sprites/monsters/bat_0.png",
+      "assets/sprites/monsters/bat_1.png",
+      "assets/sprites/monsters/bat_2.png",
+    ],
+    reaper: [
+      "assets/sprites/monsters/reaper_0.png",
+      "assets/sprites/monsters/reaper_1.png",
+    ],
+    gargoyle: [
+      "assets/sprites/monsters/gargoyle_0.png",
+      "assets/sprites/monsters/gargoyle_1.png",
+    ],
+    darkKnight: [
+      "assets/sprites/monsters/dark_knight_0.png",
+      "assets/sprites/monsters/dark_knight_1.png",
     ],
     boss: [
       "assets/sprites/monsters/boss_0.png",
@@ -383,6 +405,11 @@ const animations = {
     brute: { idle: [0], walk: [0], speed: 700 },
     hellhound: { idle: [0], walk: [0], speed: 380 },
     demon: { idle: [0], walk: [0], speed: 760 },
+    floatingEye: { idle: [0, 1], walk: [0, 1], attack: [2], speed: 420 },
+    bat: { idle: [0, 1, 2], walk: [0, 1, 2], speed: 220 },
+    reaper: { idle: [0, 1], walk: [0, 1], speed: 680 },
+    gargoyle: { idle: [0, 1], walk: [0, 1], speed: 760 },
+    darkKnight: { idle: [0, 1], walk: [0, 1], speed: 640 },
   },
 };
 
@@ -436,11 +463,16 @@ const classes = {
 const monsterTypes = [
   { kind: "goblin", hp: 22, speed: 104, touch: 9, xp: 4, shard: 1 },
   { kind: "skeleton", hp: 25, speed: 98, touch: 10, xp: 5, shard: 1 },
+  { kind: "bat", hp: 16, speed: 172, touch: 7, xp: 4, shard: 1 },
   { kind: "shade", hp: 30, speed: 86, touch: 8, xp: 7, shard: 2 },
   { kind: "spitter", hp: 36, speed: 78, touch: 8, xp: 8, shard: 2 },
+  { kind: "floatingEye", hp: 42, speed: 82, touch: 10, xp: 9, shard: 2 },
   { kind: "brute", hp: 70, speed: 65, touch: 18, xp: 11, shard: 3 },
   { kind: "hellhound", hp: 44, speed: 144, touch: 15, xp: 11, shard: 3 },
   { kind: "demon", hp: 110, speed: 72, touch: 23, xp: 18, shard: 5 },
+  { kind: "gargoyle", hp: 145, speed: 58, touch: 24, xp: 22, shard: 6 },
+  { kind: "reaper", hp: 95, speed: 96, touch: 30, xp: 24, shard: 7 },
+  { kind: "darkKnight", hp: 170, speed: 70, touch: 28, xp: 30, shard: 8 },
 ];
 
 const dailyMods = [
@@ -473,12 +505,20 @@ const lootTable = [
   { base: "Ashen Blade", slot: "weapon", stat: "damage", value: 5 },
   { base: "Moonbow", slot: "weapon", stat: "damage", value: 4 },
   { base: "Runed Staff", slot: "weapon", stat: "skillPower", value: .16 },
+  { base: "Grave Scythe", slot: "weapon", stat: "damage", value: 7 },
+  { base: "Eye of Ruin", slot: "weapon", stat: "skillPower", value: .22 },
   { base: "Crypt Plate", slot: "armor", stat: "maxHp", value: 24 },
   { base: "Wanderer Cloak", slot: "armor", stat: "speed", value: .06 },
+  { base: "Gargoyle Hide", slot: "armor", stat: "maxHp", value: 34 },
+  { base: "Nightstalker Wraps", slot: "armor", stat: "speed", value: .09 },
   { base: "Ember Ring", slot: "ring", stat: "damage", value: 3 },
   { base: "Vampire Ring", slot: "ring", stat: "maxHp", value: 16 },
+  { base: "Batfang Band", slot: "ring", stat: "speed", value: .07 },
+  { base: "Obsidian Signet", slot: "ring", stat: "damage", value: 5 },
   { base: "Ancient Amulet", slot: "amulet", stat: "cooldownRate", value: .12 },
   { base: "Storm Charm", slot: "amulet", stat: "skillPower", value: .18 },
+  { base: "Reaper's Locket", slot: "amulet", stat: "cooldownRate", value: .18 },
+  { base: "Void Lens", slot: "amulet", stat: "skillPower", value: .26 },
 ];
 
 let save = loadSave();
@@ -655,12 +695,14 @@ function cleanPlayerName(name) {
 
 function createDungeon() {
   const rooms = [
-    { id: "start", x: 820, y: 760, w: 360, h: 260, name: "Old Trail" },
-    { id: "gate", x: 135, y: 35, w: 430, h: 340, name: "Violet Gate" },
-    { id: "camp", x: 1620, y: 65, w: 430, h: 330, name: "Hunter Camp" },
-    { id: "swamp", x: 130, y: 865, w: 520, h: 360, name: "Drowned Pier" },
-    { id: "ruins", x: 1540, y: 1030, w: 470, h: 360, name: "Broken Watch" },
-    { id: "boss", x: 980, y: 220, w: 440, h: 360, name: "Ritual Circle", boss: true },
+    { id: "start", x: 1040, y: 920, w: 410, h: 290, name: "Old Trail" },
+    { id: "gate", x: 135, y: 60, w: 500, h: 380, name: "Violet Gate" },
+    { id: "camp", x: 2140, y: 90, w: 520, h: 360, name: "Hunter Camp" },
+    { id: "swamp", x: 150, y: 1120, w: 590, h: 420, name: "Drowned Pier" },
+    { id: "ruins", x: 2060, y: 1325, w: 560, h: 430, name: "Broken Watch" },
+    { id: "crypt", x: 1320, y: 1570, w: 460, h: 330, name: "Gargoyle Crypt" },
+    { id: "watch", x: 2480, y: 760, w: 430, h: 330, name: "Black Watch" },
+    { id: "boss", x: 1180, y: 235, w: 500, h: 390, name: "Ritual Circle", boss: true },
   ];
   const corridors = [
     rectBetween(rooms[0], rooms[1]),
@@ -668,16 +710,22 @@ function createDungeon() {
     rectBetween(rooms[0], rooms[3]),
     rectBetween(rooms[3], rooms[4]),
     rectBetween(rooms[4], rooms[5]),
-    rectBetween(rooms[2], rooms[5]),
+    rectBetween(rooms[5], rooms[6]),
+    rectBetween(rooms[6], rooms[2]),
+    rectBetween(rooms[4], rooms[7]),
+    rectBetween(rooms[2], rooms[7]),
+    rectBetween(rooms[0], rooms[7]),
   ];
   return {
     rooms,
     corridors,
     chests: [
-      { x: 1510, y: 620, id: "trail", opened: false, rarity: "blue" },
-      { x: 420, y: 980, id: "swamp", opened: false, rarity: "green" },
-      { x: 1800, y: 1245, id: "ruins", opened: false, rarity: "gold" },
-      { x: 1315, y: 470, id: "boss", opened: false, rarity: "red" },
+      { x: 1760, y: 775, id: "trail", opened: false, rarity: "blue" },
+      { x: 470, y: 1250, id: "swamp", opened: false, rarity: "green" },
+      { x: 2390, y: 1555, id: "ruins", opened: false, rarity: "gold" },
+      { x: 1570, y: 1750, id: "crypt", opened: false, rarity: "purple" },
+      { x: 2685, y: 910, id: "watch", opened: false, rarity: "purple" },
+      { x: 1450, y: 485, id: "boss", opened: false, rarity: "red" },
     ],
     decor: createMapDecor(),
     obstacles: createMapObstacles(),
@@ -687,41 +735,46 @@ function createDungeon() {
 function createMapDecor() {
   return [
     { sprite: "ruinTower", x: 235, y: 120, s: 1.6 },
-    { sprite: "portal", x: 1220, y: 240, s: 1.15 },
-    { sprite: "tent", x: 1740, y: 210, s: 1.55 },
-    { sprite: "altar", x: 1185, y: 365, s: 1.25 },
-    { sprite: "bannerRed", x: 985, y: 350, s: 1.0 },
-    { sprite: "bannerBlue", x: 1410, y: 310, s: 1.0 },
-    { sprite: "torch", x: 980, y: 455, s: 1.0 },
-    { sprite: "torch", x: 1415, y: 455, s: 1.0 },
+    { sprite: "portal", x: 1460, y: 265, s: 1.15 },
+    { sprite: "tent", x: 2360, y: 235, s: 1.55 },
+    { sprite: "altar", x: 1435, y: 415, s: 1.25 },
+    { sprite: "bannerRed", x: 1185, y: 395, s: 1.0 },
+    { sprite: "bannerBlue", x: 1640, y: 350, s: 1.0 },
+    { sprite: "torch", x: 1190, y: 505, s: 1.0 },
+    { sprite: "torch", x: 1655, y: 505, s: 1.0 },
     { sprite: "purpleCrystal", x: 315, y: 245, s: 1.1 },
-    { sprite: "treePine0", x: 310, y: 760, s: 1.2 },
-    { sprite: "treePine1", x: 1820, y: 760, s: 1.2 },
-    { sprite: "deadTree", x: 650, y: 650, s: 1.1 },
-    { sprite: "deadTree", x: 1650, y: 890, s: 1.05 },
-    { sprite: "rocks0", x: 560, y: 520, s: 1.0 },
-    { sprite: "rocks0", x: 1530, y: 1090, s: 1.2 },
-    { sprite: "stump", x: 1740, y: 650, s: 1.0 },
-    { sprite: "barrel", x: 1810, y: 300, s: 1.0 },
-    { sprite: "crate", x: 1865, y: 320, s: 1.0 },
+    { sprite: "treePine0", x: 390, y: 930, s: 1.2 },
+    { sprite: "treePine1", x: 2260, y: 920, s: 1.2 },
+    { sprite: "deadTree", x: 830, y: 820, s: 1.1 },
+    { sprite: "deadTree", x: 1960, y: 1120, s: 1.05 },
+    { sprite: "rocks0", x: 720, y: 650, s: 1.0 },
+    { sprite: "rocks0", x: 2010, y: 1385, s: 1.2 },
+    { sprite: "rocks0", x: 1560, y: 1645, s: 1.1 },
+    { sprite: "stump", x: 2180, y: 820, s: 1.0 },
+    { sprite: "barrel", x: 2430, y: 345, s: 1.0 },
+    { sprite: "crate", x: 2500, y: 365, s: 1.0 },
+    { sprite: "ruinTower", x: 2690, y: 885, s: 1.15 },
+    { sprite: "purpleCrystal", x: 1510, y: 1750, s: 1.25 },
   ];
 }
 
 function createMapObstacles() {
   return [
     { x: 250, y: 125, r: 92 },
-    { x: 112, y: 650, r: 70 },
-    { x: 210, y: 1135, r: 115 },
-    { x: 485, y: 1195, r: 72 },
-    { x: 1745, y: 210, r: 110 },
-    { x: 1815, y: 405, r: 76 },
-    { x: 1795, y: 635, r: 94 },
-    { x: 1870, y: 1440, r: 128 },
-    { x: 2105, y: 965, r: 92 },
-    { x: 1120, y: 230, r: 74 },
-    { x: 650, y: 650, r: 54 },
-    { x: 1530, y: 1090, r: 62 },
-    { x: 880, y: 1300, r: 62 },
+    { x: 150, y: 850, r: 70 },
+    { x: 255, y: 1435, r: 115 },
+    { x: 535, y: 1500, r: 72 },
+    { x: 2365, y: 235, r: 110 },
+    { x: 2490, y: 475, r: 76 },
+    { x: 2240, y: 820, r: 94 },
+    { x: 2520, y: 1800, r: 128 },
+    { x: 2775, y: 1190, r: 92 },
+    { x: 1360, y: 270, r: 74 },
+    { x: 830, y: 820, r: 54 },
+    { x: 2010, y: 1385, r: 62 },
+    { x: 1140, y: 1640, r: 62 },
+    { x: 1510, y: 1750, r: 76 },
+    { x: 2690, y: 885, r: 88 },
   ];
 }
 
@@ -891,10 +944,10 @@ async function loadOnlineLeaderboard() {
 function spawnEnemy(forceKind) {
   const p = state.player;
   const angle = Math.random() * Math.PI * 2;
-  const distance = rand(330, 520);
+  const distance = rand(380, 680);
   const x = clamp(p.x + Math.cos(angle) * distance, 48, worldSize.w - 48);
   const y = clamp(p.y + Math.sin(angle) * distance, 48, worldSize.h - 48);
-  const pool = state.kills < 10 ? monsterTypes.slice(0, 2) : monsterTypes;
+  const pool = monsterPool();
   const base = forceKind ? monsterTypes.find(m => m.kind === forceKind) : pool[Math.floor(Math.random() * pool.length)];
   const elite = Math.random() < Math.min(.05 + state.level * .007, .16);
   const hpScale = (elite ? 1.75 : 1) * (state.mod.hp || 1) * (1 + state.level * .08);
@@ -902,7 +955,7 @@ function spawnEnemy(forceKind) {
     ...base,
     x,
     y,
-    r: elite ? 19 : base.kind === "brute" ? 18 : 14,
+    r: monsterRadius(base.kind, elite),
     hp: base.hp * hpScale,
     maxHp: base.hp * hpScale,
     speed: base.speed * (state.mod.speed || 1) * (1 + state.level * .014),
@@ -913,6 +966,26 @@ function spawnEnemy(forceKind) {
     attackAnim: 0,
     hitFlash: 0,
   });
+}
+
+function monsterPool() {
+  if (state.kills < 8) return monsterTypes.filter(m => ["goblin", "skeleton", "bat"].includes(m.kind));
+  if (state.kills < 22) return monsterTypes.filter(m => !["gargoyle", "reaper", "darkKnight"].includes(m.kind));
+  if (state.kills < 42) return monsterTypes.filter(m => m.kind !== "darkKnight");
+  return monsterTypes;
+}
+
+function monsterRadius(kind, elite) {
+  const base = {
+    bat: 11,
+    floatingEye: 15,
+    brute: 18,
+    demon: 21,
+    gargoyle: 24,
+    reaper: 20,
+    darkKnight: 23,
+  }[kind] || 14;
+  return elite ? base + 5 : base;
 }
 
 function spawnBoss() {
@@ -1116,23 +1189,24 @@ function castSpinningLeaf() {
 }
 
 function enemyCast(enemy) {
-  if (enemy.kind !== "spitter" && !enemy.boss) return;
+  const caster = enemy.kind === "spitter" || enemy.kind === "floatingEye" || enemy.kind === "reaper" || enemy.boss;
+  if (!caster) return;
   enemy.attackAnim = .28;
   const p = state.player;
   const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
-  const count = enemy.boss ? 5 : 1;
+  const count = enemy.boss ? 5 : enemy.kind === "reaper" ? 3 : 1;
   for (let i = 0; i < count; i++) {
-    const offset = (i - (count - 1) / 2) * .18;
+    const offset = (i - (count - 1) / 2) * (enemy.kind === "reaper" ? .22 : .18);
     state.bullets.push({
       x: enemy.x,
       y: enemy.y,
-      vx: Math.cos(angle + offset) * (enemy.boss ? 235 : 260),
-      vy: Math.sin(angle + offset) * (enemy.boss ? 235 : 260),
-      r: enemy.boss ? 7 : 5,
-      life: enemy.boss ? 2.2 : 1.7,
-      damage: enemy.boss ? 15 : 8,
+      vx: Math.cos(angle + offset) * (enemy.boss ? 235 : enemy.kind === "floatingEye" ? 300 : 260),
+      vy: Math.sin(angle + offset) * (enemy.boss ? 235 : enemy.kind === "floatingEye" ? 300 : 260),
+      r: enemy.boss ? 7 : enemy.kind === "floatingEye" ? 6 : 5,
+      life: enemy.boss ? 2.2 : enemy.kind === "reaper" ? 1.9 : 1.7,
+      damage: enemy.boss ? 15 : enemy.kind === "reaper" ? 12 : 8,
       hostile: true,
-      color: enemy.boss ? "#f26a6a" : "#a0ff73",
+      color: enemy.boss ? "#f26a6a" : enemy.kind === "floatingEye" ? "#f26a6a" : enemy.kind === "reaper" ? "#c989ff" : "#a0ff73",
     });
   }
 }
@@ -1181,10 +1255,12 @@ function update(dt) {
     state.attackClock = p.fireDelay;
   }
 
-  const spawnDelay = Math.max(.16, (.92 - state.level * .032) * (state.mod.spawn || 1));
+  const spawnDelay = Math.max(.11, (.68 - state.level * .026) * (state.mod.spawn || 1));
   if (state.spawnClock <= 0) {
     spawnEnemy();
-    if (state.kills > 18 && Math.random() < .3) spawnEnemy();
+    if (state.kills > 8 && Math.random() < .55) spawnEnemy();
+    if (state.kills > 28 && Math.random() < .34) spawnEnemy();
+    if (state.kills > 55 && Math.random() < .2) spawnEnemy();
     state.spawnClock = spawnDelay;
   }
 
@@ -1196,7 +1272,7 @@ function update(dt) {
 
   for (const enemy of state.enemies) {
     const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
-    const keepDistance = enemy.kind === "spitter" ? 115 : 0;
+    const keepDistance = enemy.kind === "spitter" || enemy.kind === "floatingEye" ? 130 : 0;
     const distance = dist(enemy, p);
     const moveDir = keepDistance && distance < keepDistance ? -1 : 1;
     const speedFactor = enemy.slow > 0 ? enemy.slowFactor || .65 : 1;
@@ -1209,7 +1285,7 @@ function update(dt) {
     if (enemy.attackClock <= 0) {
       enemyCast(enemy);
       enemy.attackClock = enemy.boss ? 1.8 : rand(1.4, 2.3);
-      if (enemy.boss && Math.random() < .5) spawnEnemy("shade");
+      if (enemy.boss && Math.random() < .5) spawnEnemy(Math.random() < .45 ? "reaper" : "shade");
     }
 
     if (distance < enemy.r + p.r) {
@@ -1682,15 +1758,25 @@ function drawMonster(enemy) {
     const anim = animations.monsters[enemy.kind] || animations.monsters.goblin;
     const mode = enemy.attackAnim > 0 && anim.attack ? "attack" : "walk";
     const frame = pickFrame(frames, anim[mode] || anim.idle, anim.speed, enemy.animPhase);
-    const scale = enemy.elite ? 1.35 : enemy.kind === "demon" ? 1.12 : enemy.kind === "brute" ? 1.0 : 1.18;
-    const speedMood = enemy.kind === "hellhound" ? 190 : enemy.kind === "brute" || enemy.kind === "demon" ? 520 : 330;
-    const bobAmount = enemy.kind === "hellhound" ? 3.2 : enemy.kind === "brute" || enemy.kind === "demon" ? 1.1 : 2.1;
+    const baseScale = {
+      bat: .95,
+      floatingEye: 1.05,
+      demon: 1.12,
+      brute: 1.0,
+      gargoyle: .88,
+      reaper: .92,
+      darkKnight: .88,
+    }[enemy.kind] || 1.18;
+    const scale = enemy.elite ? baseScale * 1.18 : baseScale;
+    const heavy = enemy.kind === "brute" || enemy.kind === "demon" || enemy.kind === "gargoyle" || enemy.kind === "darkKnight";
+    const speedMood = enemy.kind === "hellhound" || enemy.kind === "bat" ? 190 : heavy ? 520 : 330;
+    const bobAmount = enemy.kind === "bat" ? 5.2 : enemy.kind === "floatingEye" ? 4.2 : enemy.kind === "hellhound" ? 3.2 : heavy ? 1.1 : 2.1;
     const bob = Math.sin((performance.now() + enemy.animPhase) / speedMood) * bobAmount;
     drawCircle(enemy.x, enemy.y + enemy.r * .9, enemy.r * .95, "rgba(0,0,0,.25)");
     drawAnimatedSpriteBottom(frame, enemy.x, enemy.y + enemy.r + 7, scale, {
       flipX: state.player.x < enemy.x,
       bob,
-      tilt: Math.sin((performance.now() + enemy.animPhase) / speedMood) * (enemy.kind === "brute" || enemy.kind === "demon" ? .018 : .045),
+      tilt: Math.sin((performance.now() + enemy.animPhase) / speedMood) * (heavy ? .018 : .045),
       squash: enemy.attackAnim > 0 ? .92 : 1 + Math.sin((performance.now() + enemy.animPhase) / 260) * .025,
       stretch: enemy.attackAnim > 0 ? 1.12 : 1 + Math.cos((performance.now() + enemy.animPhase) / 310) * .018,
       lunge: enemy.attackAnim > 0 ? 8 : 0,
@@ -1724,6 +1810,11 @@ function drawMonster(enemy) {
   if (enemy.kind === "skeleton") drawGoblin(enemy);
   if (enemy.kind === "hellhound") drawShade(enemy);
   if (enemy.kind === "demon") drawBrute(enemy);
+  if (enemy.kind === "bat") drawShade(enemy);
+  if (enemy.kind === "floatingEye") drawSpitter(enemy);
+  if (enemy.kind === "reaper") drawShade(enemy);
+  if (enemy.kind === "gargoyle") drawBrute(enemy);
+  if (enemy.kind === "darkKnight") drawBrute(enemy);
   if (enemy.kind === "shade") drawShade(enemy);
   if (enemy.kind === "brute") drawBrute(enemy);
   if (enemy.kind === "spitter") drawSpitter(enemy);
