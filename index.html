@@ -153,14 +153,59 @@
             <h2 data-i18n="lastRunLoot">Laatste run loot</h2>
             <div id="campLootPanel" class="inventory-panel"></div>
           </section>
+          <section class="camp-wide">
+            <h2>Inventory</h2>
+            <div id="campInventoryPanel" class="inventory-panel"></div>
+          </section>
           <section>
             <h2>Leaderboard</h2>
             <div id="leaderboardPanel" class="leaderboard-panel"></div>
           </section>
         </div>
         <div class="camp-actions">
+          <button id="campShopBtn" class="secondary">Shop</button>
           <button id="campStartBtn" data-i18n="startRun">Start Run</button>
           <button id="campCloseBtn" class="secondary" data-i18n="viewMap">Bekijk Map</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="shopScreen" class="camp-screen hidden">
+      <div class="camp-card shop-card">
+        <div class="camp-hero">
+          <p>Dungeon Market</p>
+          <h1>Shop</h1>
+          <span id="shopSubtitle">Koop caches met shards en equip je vondsten meteen.</span>
+        </div>
+        <div class="shop-layout">
+          <section>
+            <h2>Character</h2>
+            <div id="shopCharacterPanel" class="character-panel"></div>
+          </section>
+          <section>
+            <h2>Shop</h2>
+            <div class="shop-panel">
+              <button data-shop="common-cache">
+                <span>Adventurer Cache</span>
+                <small>Random item, kost 18 shards</small>
+              </button>
+              <button data-shop="rare-cache">
+                <span>Runed Cache</span>
+                <small>Rare+ kans, kost 45 shards</small>
+              </button>
+              <button data-shop="legendary-cache">
+                <span>Ancient Cache</span>
+                <small>Epic/legendary kans, kost 120 shards</small>
+              </button>
+            </div>
+          </section>
+          <section class="shop-wide">
+            <h2>Inventory</h2>
+            <div id="shopInventoryPanel" class="inventory-panel"></div>
+          </section>
+        </div>
+        <div class="camp-actions">
+          <button id="shopCloseBtn" data-i18n="backToCamp">Naar kamp</button>
         </div>
       </div>
     </div>

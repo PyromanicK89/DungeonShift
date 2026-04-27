@@ -26,6 +26,13 @@ const els = {
   campClassSelect: document.querySelector("#campClassSelect"),
   campCharacterPanel: document.querySelector("#campCharacterPanel"),
   campLootPanel: document.querySelector("#campLootPanel"),
+  campInventoryPanel: document.querySelector("#campInventoryPanel"),
+  campShopBtn: document.querySelector("#campShopBtn"),
+  shopScreen: document.querySelector("#shopScreen"),
+  shopSubtitle: document.querySelector("#shopSubtitle"),
+  shopCharacterPanel: document.querySelector("#shopCharacterPanel"),
+  shopInventoryPanel: document.querySelector("#shopInventoryPanel"),
+  shopCloseBtn: document.querySelector("#shopCloseBtn"),
   leaderboardPanel: document.querySelector("#leaderboardPanel"),
   startBtn: document.querySelector("#startBtn"),
   resetBtn: document.querySelector("#resetBtn"),
@@ -218,6 +225,7 @@ const i18n = {
     viewMap: "Bekijk Map",
     chooseUpgrade: "Kies een run-upgrade",
     backToCamp: "Naar kamp",
+    shopSubtitle: "Koop caches met shards en equip je vondsten meteen.",
     running: "Run bezig",
     newRun: "Nieuwe Run",
     readyTitle: "Ready",
@@ -256,6 +264,7 @@ const i18n = {
     summaryShards: "shards",
     summaryLevel: "level",
     runComplete: "Run voltooid",
+    openShop: "Shop",
   },
   en: {
     startRun: "Start Run",
@@ -276,6 +285,7 @@ const i18n = {
     viewMap: "View Map",
     chooseUpgrade: "Choose a run upgrade",
     backToCamp: "Back to camp",
+    shopSubtitle: "Buy caches with shards and equip your finds right away.",
     running: "Run active",
     newRun: "New Run",
     readyTitle: "Ready",
@@ -314,6 +324,7 @@ const i18n = {
     summaryShards: "shards",
     summaryLevel: "level",
     runComplete: "Run complete",
+    openShop: "Shop",
   },
 };
 
@@ -2087,6 +2098,8 @@ function applyLanguage() {
   if (!state.running) {
     els.startBtn.textContent = state.ended ? t("newRun") : t("startRun");
   }
+  els.campShopBtn.textContent = t("openShop");
+  els.shopSubtitle.textContent = t("shopSubtitle");
 }
 
 function renderMeta() {
@@ -2112,7 +2125,15 @@ function renderCamp() {
   }
   renderClassButtons(els.campClassSelect);
   renderCharacterInto(els.campCharacterPanel);
+  renderInventoryInto(els.campInventoryPanel, 24);
   renderLastRunLoot();
+  renderShopScreen();
+}
+
+function renderShopScreen() {
+  els.shopSubtitle.textContent = t("shopSubtitle");
+  renderCharacterInto(els.shopCharacterPanel);
+  renderInventoryInto(els.shopInventoryPanel, 24);
 }
 
 function renderLastRunLoot() {
@@ -2177,13 +2198,17 @@ function renderCharacterInto(target) {
 }
 
 function renderInventory() {
-  els.inventoryPanel.innerHTML = "";
-  const items = save.inventory.slice(0, 12);
+  renderInventoryInto(els.inventoryPanel, 12);
+}
+
+function renderInventoryInto(target, limit = 12) {
+  target.innerHTML = "";
+  const items = save.inventory.slice(0, limit);
   if (!items.length) {
     const empty = document.createElement("div");
     empty.className = "equipment-slot";
     empty.innerHTML = `<span>${t("noItems")}</span><small>${t("noItemsHint")}</small>`;
-    els.inventoryPanel.appendChild(empty);
+    target.appendChild(empty);
     return;
   }
   for (const item of items) {
@@ -2201,7 +2226,7 @@ function renderInventory() {
       </div>
       ${itemTooltip(item)}
     `;
-    els.inventoryPanel.appendChild(div);
+    target.appendChild(div);
   }
 }
 
@@ -2345,7 +2370,12 @@ function formatTime(value) {
   return `${min}:${sec}`;
 }
 
+function isTypingTarget(target) {
+  return ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName) || target?.isContentEditable;
+}
+
 window.addEventListener("keydown", event => {
+  if (isTypingTarget(event.target)) return;
   const key = event.key.toLowerCase();
   if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright", " ", "q", "e", "r"].includes(key)) {
     event.preventDefault();
@@ -2366,7 +2396,10 @@ window.addEventListener("keydown", event => {
   }
 });
 
-window.addEventListener("keyup", event => keys.delete(event.key.toLowerCase()));
+window.addEventListener("keyup", event => {
+  if (isTypingTarget(event.target)) return;
+  keys.delete(event.key.toLowerCase());
+});
 
 canvas.addEventListener("pointermove", event => {
   const rect = canvas.getBoundingClientRect();
@@ -2394,6 +2427,16 @@ els.campStartBtn.addEventListener("click", startRun);
 els.campCloseBtn.addEventListener("click", () => {
   els.campScreen.classList.add("hidden");
 });
+els.campShopBtn.addEventListener("click", () => {
+  renderShopScreen();
+  els.campScreen.classList.add("hidden");
+  els.shopScreen.classList.remove("hidden");
+});
+els.shopCloseBtn.addEventListener("click", () => {
+  renderCamp();
+  els.shopScreen.classList.add("hidden");
+  els.campScreen.classList.remove("hidden");
+});
 els.playerNameInput.addEventListener("input", () => {
   save.playerName = cleanPlayerName(els.playerNameInput.value);
   localStorage.setItem(storeKey, JSON.stringify(save));
@@ -2418,16 +2461,13 @@ document.querySelectorAll("[data-upgrade]").forEach(button => {
   button.addEventListener("click", () => buy(button.dataset.upgrade));
 });
 
-els.inventoryPanel.addEventListener("click", event => {
+document.addEventListener("click", event => {
   const equip = event.target.closest("[data-equip]");
   const salvage = event.target.closest("[data-salvage]");
+  const shop = event.target.closest("[data-shop]");
   if (equip) equipItem(equip.dataset.equip);
   if (salvage) salvageItem(salvage.dataset.salvage);
-});
-
-els.shopPanel.addEventListener("click", event => {
-  const button = event.target.closest("[data-shop]");
-  if (button) buyShopItem(button.dataset.shop);
+  if (shop) buyShopItem(shop.dataset.shop);
 });
 
 renderMeta();

@@ -579,12 +579,31 @@ section {
   gap: 12px;
 }
 
-.camp-grid section {
+.camp-grid section,
+.shop-layout section {
   margin: 0;
   padding: 12px;
   border: 1px solid var(--edge);
   border-radius: 8px;
   background: rgba(255,255,255,.035);
+}
+
+.camp-wide {
+  grid-column: span 2;
+}
+
+.shop-card {
+  width: min(980px, calc(100vw - 36px));
+}
+
+.shop-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, .9fr) minmax(260px, .9fr);
+  gap: 12px;
+}
+
+.shop-wide {
+  grid-column: 1 / -1;
 }
 
 .camp-actions {
@@ -682,6 +701,15 @@ section {
   }
 
   .camp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .camp-wide,
+  .shop-wide {
+    grid-column: auto;
+  }
+
+  .shop-layout {
     grid-template-columns: 1fr;
   }
 }
