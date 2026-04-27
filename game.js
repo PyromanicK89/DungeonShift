@@ -1351,15 +1351,16 @@ function drawBurst(burst) {
 }
 
 function drawArena() {
-  if (spritesReady && spriteImages.get(sprites.map.background)?.complete) {
+  const background = spriteImages.get(sprites.map.background);
+  if (spritesReady && isDrawableImage(background)) {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(spriteImages.get(sprites.map.background), 0, 0, worldSize.w, worldSize.h);
+    ctx.drawImage(background, 0, 0, worldSize.w, worldSize.h);
   } else {
     ctx.fillStyle = "#171b1d";
     ctx.fillRect(0, 0, worldSize.w, worldSize.h);
   }
 
-  if (spritesReady && !spriteImages.get(sprites.map.background)?.complete) {
+  if (spritesReady && !isDrawableImage(background)) {
     const stoneA = spriteImages.get(sprites.tiles[0]);
     const stoneB = spriteImages.get(sprites.tiles[1]);
     const tileW = 86;
@@ -1367,6 +1368,7 @@ function drawArena() {
     for (let y = 0; y < worldSize.h; y += tileH) {
       for (let x = 0; x < worldSize.w; x += tileW) {
         const tile = (Math.floor(x / tileW) + Math.floor(y / tileH)) % 3 === 0 ? stoneB : stoneA;
+        if (!isDrawableImage(tile)) continue;
         ctx.globalAlpha = .96;
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(tile, x, y, tileW, tileH);
@@ -1419,7 +1421,7 @@ function drawObstacleDebug() {
 function drawMapDecor(decor) {
   const path = sprites.map.decor[decor.sprite];
   const img = spriteImages.get(path);
-  if (!img?.complete) return;
+  if (!isDrawableImage(img)) return;
   drawSpriteCentered(path, decor.x, decor.y, decor.s || 1);
 }
 
@@ -1751,7 +1753,7 @@ function drawCenterText(text) {
 
 function drawSpriteCentered(sprite, x, y, scale = 1) {
   const img = typeof sprite === "string" ? spriteImages.get(sprite) : sprite;
-  if (!img || !img.complete) return;
+  if (!isDrawableImage(img)) return;
   const w = img.naturalWidth * scale;
   const h = img.naturalHeight * scale;
   ctx.imageSmoothingEnabled = false;
@@ -1760,7 +1762,7 @@ function drawSpriteCentered(sprite, x, y, scale = 1) {
 
 function drawSpriteBottom(sprite, x, groundY, scale = 1, flipX = false) {
   const img = typeof sprite === "string" ? spriteImages.get(sprite) : sprite;
-  if (!img || !img.complete) return;
+  if (!isDrawableImage(img)) return;
   const w = img.naturalWidth * scale;
   const h = img.naturalHeight * scale;
   ctx.save();
@@ -1773,7 +1775,7 @@ function drawSpriteBottom(sprite, x, groundY, scale = 1, flipX = false) {
 
 function drawAnimatedSpriteBottom(sprite, x, groundY, scale = 1, options = {}) {
   const img = typeof sprite === "string" ? spriteImages.get(sprite) : sprite;
-  if (!img || !img.complete) return;
+  if (!isDrawableImage(img)) return;
   const lungeX = Math.cos(options.angle || 0) * (options.lunge || 0);
   const lungeY = Math.sin(options.angle || 0) * (options.lunge || 0);
   const w = img.naturalWidth * scale;
@@ -1796,7 +1798,7 @@ function drawAnimatedSpriteBottom(sprite, x, groundY, scale = 1, options = {}) {
 
 function drawRotatedSprite(sprite, x, y, scale = 1, angle = 0) {
   const img = typeof sprite === "string" ? spriteImages.get(sprite) : sprite;
-  if (!img || !img.complete) return;
+  if (!isDrawableImage(img)) return;
   const w = img.naturalWidth * scale;
   const h = img.naturalHeight * scale;
   ctx.save();
@@ -1805,6 +1807,10 @@ function drawRotatedSprite(sprite, x, y, scale = 1, angle = 0) {
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
   ctx.restore();
+}
+
+function isDrawableImage(img) {
+  return Boolean(img?.complete && img.naturalWidth > 0 && img.naturalHeight > 0);
 }
 
 function pickFrame(frames, indexes, frameMs = 500, phase = 0) {
