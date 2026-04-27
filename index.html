@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dungeon Shift</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="game-panel">
+        <canvas id="game" width="960" height="540" aria-label="Dungeon Shift speelveld"></canvas>
+        <div class="hud">
+          <div>
+            <strong id="hpText">HP 100/100</strong>
+            <div class="bar"><span id="hpBar"></span></div>
+          </div>
+          <div>
+            <strong id="xpText">Level 1</strong>
+            <div class="bar xp"><span id="xpBar"></span></div>
+          </div>
+          <div class="stat-line">
+            <span id="timer">03:00</span>
+            <span id="coins">0 shards</span>
+            <span id="kills">0 kills</span>
+          </div>
+        </div>
+        <div class="objective-card">
+          <strong id="objectiveTitle">Objective</strong>
+          <span id="objectiveText">Start een run</span>
+        </div>
+        <canvas id="minimap" class="minimap" width="170" height="120" aria-label="Dungeon Shift minimap"></canvas>
+        <div id="abilityBar" class="ability-bar"></div>
+      </section>
+
+      <aside class="side-panel">
+        <header>
+          <p>Prototype</p>
+          <h1>Dungeon Shift</h1>
+        </header>
+
+        <div class="controls">
+          <button id="startBtn">Start Run</button>
+          <button id="resetBtn" class="secondary">Reset Progressie</button>
+        </div>
+
+        <section>
+          <h2>Kies je held</h2>
+          <div id="classSelect" class="class-select"></div>
+        </section>
+
+        <section>
+          <h2>Dagelijkse vloek</h2>
+          <p id="dailyMod">Laden...</p>
+        </section>
+
+        <section>
+          <h2>Daily quests</h2>
+          <div id="dailyQuests" class="quest-list"></div>
+        </section>
+
+        <section>
+          <h2>Permanente upgrades</h2>
+          <div class="upgrade-shop">
+            <button data-upgrade="might">
+              <span>Might</span>
+              <small>+1 schade, kost <b id="mightCost">10</b></small>
+            </button>
+            <button data-upgrade="vigor">
+              <span>Vigor</span>
+              <small>+8 max HP, kost <b id="vigorCost">12</b></small>
+            </button>
+            <button data-upgrade="swift">
+              <span>Swift</span>
+              <small>+2% snelheid, kost <b id="swiftCost">14</b></small>
+            </button>
+          </div>
+        </section>
+
+        <section class="run-notes">
+          <h2>Besturing</h2>
+          <p>Tijdens een run: WASD bewegen, muis richten, linkermuisknop basisaanval, Q/E/R abilities, spatie dash. Items draag je vooraf in het character menu.</p>
+        </section>
+
+        <section>
+          <h2>Meta progressie</h2>
+          <p id="metaStats">0 totale shards</p>
+        </section>
+
+        <section>
+          <h2>Character menu</h2>
+          <div id="characterPanel" class="character-panel"></div>
+        </section>
+
+        <section>
+          <h2>Shop</h2>
+          <div id="shopPanel" class="shop-panel">
+            <button data-shop="common-cache">
+              <span>Adventurer Cache</span>
+              <small>Random item, kost 18 shards</small>
+            </button>
+            <button data-shop="rare-cache">
+              <span>Runed Cache</span>
+              <small>Rare+ kans, kost 45 shards</small>
+            </button>
+            <button data-shop="legendary-cache">
+              <span>Ancient Cache</span>
+              <small>Epic/legendary kans, kost 120 shards</small>
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Inventory</h2>
+          <div id="inventoryPanel" class="inventory-panel"></div>
+        </section>
+
+        <section>
+          <h2>Laatste loot</h2>
+          <p id="lootLog">Nog geen bijzondere vondsten.</p>
+        </section>
+      </aside>
+    </main>
+
+    <div id="campScreen" class="camp-screen">
+      <div class="camp-card">
+        <div class="camp-hero">
+          <p>Daily ARPG Prototype</p>
+          <h1>Dungeon Shift</h1>
+          <span id="campSubtitle">Bereid je run voor</span>
+        </div>
+        <label class="player-name-field">
+          <span>Naam voor leaderboard</span>
+          <input id="playerNameInput" maxlength="18" placeholder="Vul je naam in">
+        </label>
+        <div class="camp-grid">
+          <section>
+            <h2>Held</h2>
+            <div id="campClassSelect" class="class-select"></div>
+          </section>
+          <section>
+            <h2>Character</h2>
+            <div id="campCharacterPanel" class="character-panel"></div>
+          </section>
+          <section>
+            <h2>Laatste run loot</h2>
+            <div id="campLootPanel" class="inventory-panel"></div>
+          </section>
+          <section>
+            <h2>Leaderboard</h2>
+            <div id="leaderboardPanel" class="leaderboard-panel"></div>
+          </section>
+        </div>
+        <div class="camp-actions">
+          <button id="campStartBtn">Start Run</button>
+          <button id="campCloseBtn" class="secondary">Bekijk Map</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="choiceModal" class="modal hidden">
+      <div class="modal-card">
+        <h2>Kies een run-upgrade</h2>
+        <div id="choices" class="choices"></div>
+      </div>
+    </div>
+
+    <div id="runSummary" class="modal hidden">
+      <div class="modal-card summary-card">
+        <h2 id="summaryTitle">Run voltooid</h2>
+        <div id="summaryStats" class="summary-stats"></div>
+        <button id="summaryClose">Naar kamp</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
